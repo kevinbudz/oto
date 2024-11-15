@@ -162,7 +162,8 @@ namespace oto
         {
             try
             {
-                _process?.Dispose();
+                // Ensure any existing process is killed before starting a new one
+                KillExistingProcess();
 
                 _process = new Process
                 {
@@ -189,6 +190,33 @@ namespace oto
             }
         }
 
+        private void KillExistingProcess()
+        {
+            try
+            {
+                var processName = Path.GetFileNameWithoutExtension(ExePath);
+                foreach (var proc in Process.GetProcessesByName(processName))
+                {
+                    try
+                    {
+                        if (proc.MainModule?.FileName?.Equals(ExePath, StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            proc.Kill();
+                            proc.WaitForExit();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MenuHelper.ShowWarning($"Could not kill {proc.ProcessName} (PID {proc.Id}): {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MenuHelper.ShowError($"Error killing existing processes for {ExePath}: {ex.Message}");
+            }
+        }
+
         public void StopProcess()
         {
             _cancellationTokenSource.Cancel();
@@ -196,9 +224,7 @@ namespace oto
             {
                 try
                 {
-
                     _process.CloseMainWindow();
-
                     if (!_process.WaitForExit(5000))
                     {
                         MenuHelper.ShowWarning($"Forcing {Path.GetFileName(ExePath)} to close...");

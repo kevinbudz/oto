@@ -12,7 +12,7 @@ namespace oto
     {
         public static async Task AddNewProcess(List<Manager> processManagers)
         {
-            MenuHelper.DisplayHeader("Add New Process");
+            MenuHelper.DisplayHeader("Add new process.");
 
             var method = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
@@ -131,7 +131,7 @@ namespace oto
                 Padding = new Padding(0, 0)
             };
 
-            var headerPanel = new Panel("[yellow]Active Processes[/]")
+            var headerPanel = new Panel("[yellow]Active processes.[/]")
             {
                 Border = BoxBorder.Heavy,
                 BorderStyle = Style.Parse("yellow"),
@@ -211,10 +211,10 @@ namespace oto
                 return;
             }
 
-            MenuHelper.DisplayHeader("Remove Process");
+            MenuHelper.DisplayHeader("Remove process.");
             var choices = processManagers.Select((p, i) =>
                 $"{i + 1}: {Path.GetFileName(p.ExePath)}").ToList();
-            choices.Add("Cancel");
+            choices.Add("Back.");
 
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
@@ -222,7 +222,7 @@ namespace oto
                     .AddChoices(choices)
             );
 
-            if (selection == "Cancel") return;
+            if (selection == "Back.") return;
 
             var index = int.Parse(selection.Split(':')[0]) - 1;
             var manager = processManagers[index];
@@ -244,7 +244,7 @@ namespace oto
                 return;
             }
 
-            MenuHelper.DisplayHeader("Modify Process Settings");
+            MenuHelper.DisplayHeader("Edit process configuations.");
             var choices = processManagers.Select((p, i) =>
                 $"{i + 1}: {Path.GetFileName(p.ExePath)}").ToList();
 
@@ -263,9 +263,11 @@ namespace oto
                     {
                         "How often the app restarts,",
                         "Auto-restarting,",
-                        "Minimizing app."
+                        "Minimizing app,",
+                        "Back."
                     })
             );
+
 
             switch (setting)
             {
@@ -275,9 +277,11 @@ namespace oto
                 case "Auto-restarting,":
                     manager.AutoRestart = MenuHelper.PromptForAutoRestart();
                     break;
-                case "Minimizing app.":
+                case "Minimizing app,":
                     manager.StartMinimized = MenuHelper.PromptForMinimizedStart();
                     break;
+                case "Back.":
+                    return;
             }
 
             MenuHelper.ShowSuccess("Settings updated successfully.");
